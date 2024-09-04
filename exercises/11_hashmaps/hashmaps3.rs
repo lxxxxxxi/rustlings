@@ -9,7 +9,7 @@
 use std::collections::HashMap;
 
 // A structure to store the goal details of a team.
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct TeamScores {
     goals_scored: u8,
     goals_conceded: u8,
@@ -17,7 +17,7 @@ struct TeamScores {
 
 fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
     // The name of the team is the key and its associated struct is the value.
-    let mut scores = HashMap::new();
+    let mut scores: HashMap<&str, TeamScores> = HashMap::new();
 
     for line in results.lines() {
         let mut split_iterator = line.split(',');
@@ -31,6 +31,20 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
         // Keep in mind that goals scored by team 1 will be the number of goals
         // conceded by team 2. Similarly, goals scored by team 2 will be the
         // number of goals conceded by team 1.
+
+        let entry = scores.entry(team_1_name).or_insert(TeamScores {
+            goals_conceded: 0,
+            goals_scored: 0,
+        });
+        entry.goals_scored += team_1_score;
+        entry.goals_conceded += team_2_score;
+
+        let entry = scores.entry(team_2_name).or_insert(TeamScores {
+            goals_conceded: 0,
+            goals_scored: 0,
+        });
+        entry.goals_scored += team_2_score;
+        entry.goals_conceded += team_1_score;
     }
 
     scores
@@ -38,6 +52,15 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
 
 fn main() {
     // You can optionally experiment here.
+    const RESULTS: &str = "England,France,4,2
+France,Italy,3,1
+Poland,Spain,2,0
+Germany,England,2,1
+England,Spain,1,0";
+    let scores = build_scores_table(RESULTS);
+    for (team, score) in &scores {
+        println!("{}: {:?}", team, score);
+    }
 }
 
 #[cfg(test)]
